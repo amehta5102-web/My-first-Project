@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Get the Food!</title>
+	<style>
+		body {
+			background-color: lightblue;
+			font-family: Arial, sans-serif;
+		}
+		.game-container {
+			width: 800px;
+			height: 600px;
+			border: 1px solid black;
+			margin: 40px auto;
+			background-color: white;
+			position: relative;
+		}
+		.score {
+			position: absolute;
+			top: 10px;
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: 24px;
+			font-weight: bold;
+		}
+		.lives {
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			font-size: 24px;
+			font-weight: bold;
+		}
+		.time-left {
+			position: absolute;
+			top: 10px;
+			right: 10px;
+			font-size: 24px;
+			font-weight: bold;
+		}
+		.food {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			background-color: #66CC00;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		.enemy {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			background-color: #CC0000;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		.user {
+			position: absolute;
+			width: 20px;
+			height: 20px;
+			background-color: #0000CC;
+			top: 90%;
+			left: 50%;
+			transform: translateX(-50%);
+		}
+		.trajectory {
+			position: absolute;
+			width: 2px;
+			height: 100px;
+			background-color: #CCCCCC;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		.game-over {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 48px;
+			font-weight: bold;
+		}
+		.stats {
+			position: absolute;
+			bottom: 10px;
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: 18px;
+		}
+	</style>
+</head>
+<body>
+	<div class="game-container">
+		<div class="score" id="score">Score: 0</div>
+		<div class="lives" id="lives">Lives: 3</div>
+		<div class="time-left" id="time-left">Time left: 120</div>
+		<div class="food" id="food" style="background-color: rgb(173, 216, 230); top: 70%; left: 40%;"></div>
+		<div class="enemy" id="enemy" style="top: 70%; left: 60%;"></div>
+		<div class="user" id="user"></div>
+		<div class="trajectory" id="trajectory" style="height: 200px; top: 70%; left: 40%;"></div>
+		<div class="trajectory" id="trajectory2" style="height: 200px; top: 70%; left: 60%;"></div>
+		<div class="game-over" id="game-over" style="display: none;">Game Over!</div>
+		<div class="stats" id="stats" style="display: none;">
+			<div id="time-left-stats">Time Left: 0</div>
+			<div id="lives-left">Lives Left: 0</div>
+			<div id="score-stats">Score: 0</div>
+			<div id="total-score">Total Score: 0</div>
+		</div>
+	</div>
+	<script>
+		let score = 0;
+		let lives = 3;
+		let timeLeft = 120;
+		let foodTop = 70;
+		let foodLeft = 40;
+		let enemyTop = 70;
+		let enemyLeft = 60;
+		let userLeft = 50;
+		let trajectoryHeight = 200;
+		let gameStarted = false;
+		let gameOver = false;
+
+		document.addEventListener("keydown", (e) => {
+			if (e.key === "ArrowLeft" && userLeft > 0) {
+				userLeft -= 5;
+				document.getElementById("user").style.left = userLeft + "%";
+			}
+			if (e.key === "ArrowRight" && userLeft < 100) {
+				userLeft += 5;
+				document.getElementById("user").style.left = userLeft + "%";
+			}
+		});
+
+		setInterval(() => {
+			if (!gameStarted) {
+				gameStarted = true;
+				startGame();
+			}
+			if (gameOver) {
+				return;
+			}
+			timeLeft -= 1;
+			document.getElementById("time-left").innerHTML = "Time left: " + timeLeft;
+			if (timeLeft <= 0) {
+				gameOver = true;
+				endGame();
+			}
+			foodTop += 2;
+			document.getElementById("food").style.top = foodTop + "%";
+			if (foodTop > 100) {
+				foodTop = 0;
+				foodLeft = Math.random() * 100;
+				document.getElementById("food").style.left = foodLeft + "%";
+			}
+			enemyTop += 2;
+			document.getElementById("enemy").style.top = enemyTop + "%";
+			if (enemyTop > 100) {
+				enemyTop = 0;
+				enemyLeft = Math.random() * 100;
+				document.getElementById("enemy").style.left = enemyLeft + "%";
+			}
+			if (Math.abs(userLeft - foodLeft) < 5 && Math.abs(90 - foodTop) < 5) {
+				score += 1;
+				document.getElementById("score").innerHTML = "Score: " + score;
+				foodTop = 0;
+				foodLeft = Math.random() * 100;
+				document.getElementById("food").style.left = foodLeft + "%";
+			}
+			if (Math.abs(userLeft - enemyLeft) < 5 && Math.abs(90 - enemyTop) < 5) {
+				lives -= 1;
+				document.getElementById("lives").innerHTML = "Lives: " + lives;
+				if (lives <= 0) {
+					gameOver = true;
+					endGame();
+				}
+			}
+		}, 1000 / 60);
+
+		function startGame() {
+			document.getElementById("game-over").style.display = "none";
+			document.getElementById("stats").style.display = "none";
+		}
+
+		function endGame() {
+			document.getElementById("game-over").style.display = "block";
+			document.getElementById("stats").style.display = "block";
+			document.getElementById("time-left-stats").innerHTML = "Time Left: " + timeLeft;
+			document.getElementById("lives-left").innerHTML = "Lives Left: " + lives;
+			document.getElementById("score-stats").innerHTML = "Score: " + score;
+			let totalScore = score + lives * 10 + timeLeft * 0.1;
+			document.getElementById("total-score").innerHTML = "Total Score: " + totalScore.toFixed(2);
+		}
+	</script>
+</body>
+</html>
